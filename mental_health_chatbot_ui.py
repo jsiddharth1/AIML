@@ -198,7 +198,7 @@ if prompt := st.chat_input("How are you feeling today?"):
 
         try:
             if not client:
-                st.error("Please enter your HuggingFace API Token in the sidebar to continue.")
+                st.error(f"DEBUG ERROR: The app couldn't load the token.\nhf_token value is: {repr(hf_token)}\n__file__ is: {__file__}")
                 st.stop()
 
             response = client.chat.completions.create(
