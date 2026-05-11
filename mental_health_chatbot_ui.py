@@ -3,18 +3,56 @@ from openai import OpenAI
 import time
 import random
 import pandas as pd
+import plotly.express as px
 
-# ---------------- PAGE SETUP ----------------
+# ---------------- PAGE SETUP & UI DESIGN ----------------
 st.set_page_config(page_title="Mental Health Companion", page_icon="🌱", layout="centered")
 
-st.title("🌱 Student Mental Health Companion")
-st.caption("A supportive AI chatbot for student mental well-being")
+# Inject Custom Premium CSS
+st.markdown("""
+<style>
+    .stApp {
+        background-color: #F7FAF7;
+    }
+    div[data-testid="stSidebar"] {
+        background-color: #E8F0E8;
+        border-right: 1px solid #d1e0d1;
+    }
+    .breathing-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4CAF50, #81C784);
+        margin: 40px auto;
+        animation: breathe 10s infinite ease-in-out;
+        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.2);
+    }
+    @keyframes breathe {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        40% { transform: scale(1.3); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 1; }
+        100% { transform: scale(0.8); opacity: 0.8; }
+    }
+    .feature-card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        margin-bottom: 20px;
+        border: 1px solid #edf2ed;
+    }
+    h1, h2, h3 {
+        color: #2C3E2D;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-st.warning("⚠️ I am an AI companion, not a licensed therapist.")
+st.title("🌱 Student Mental Health Companion")
+st.caption("A premium, supportive AI chatbot for student mental well-being")
+
+st.info("⚠️ **Note:** I am an AI companion, not a licensed therapist. If you're in crisis, please seek professional help.")
 
 # ---------------- API SETUP ----------------
-
-# Try to get token from Streamlit secrets first, fallback to sidebar input
 try:
     hf_token = st.secrets.get("HF_TOKEN")
 except Exception:
@@ -25,7 +63,7 @@ with st.sidebar:
     if not hf_token:
         hf_token = st.text_input("HuggingFace API Token", type="password", help="Get your token from https://huggingface.co/settings/tokens")
     else:
-        st.success("API Key loaded securely from secrets!")
+        st.success("✅ API Key loaded securely from secrets!")
 
 if hf_token:
     client = OpenAI(
@@ -38,198 +76,165 @@ else:
 HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
 
 # ---------------- SESSION STATE ----------------
-
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {
             "role":"system",
             "content":
-            "You are a warm mental health companion for university students. "
-            "Be empathetic, supportive and suggest simple coping strategies."
+            "You are a warm, empathetic mental health companion for university students. "
+            "Always be highly supportive, validate their feelings, and occasionally suggest using the app's built-in wellness tools (like the visual breathing exercise, music therapy, or the journal)."
         }
     ]
 
 if "mood_history" not in st.session_state:
     st.session_state.mood_history = []
 
-# ---------------- BREATHING EXERCISE ----------------
+if "journal_entries" not in st.session_state:
+    st.session_state.journal_entries = []
+
+# ---------------- FEATURES ----------------
 
 def breathing_exercise():
-
-    st.subheader("🧘 Breathing Exercise")
-
-    phases = [
-        ("Inhale deeply",4),
-        ("Hold breath",4),
-        ("Exhale slowly",6)
-    ]
-
-    progress = st.progress(0)
-
-    for text,sec in phases:
-
-        for i in range(sec):
-
-            st.write(text)
-            progress.progress((i+1)/sec)
-            time.sleep(1)
-
-    st.success("Great job! You completed the breathing exercise.")
-
-# ---------------- MUSIC THERAPY ----------------
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("🧘 Visual Breathing Exercise")
+    st.markdown("<p style='text-align:center; color:#555;'>Follow the expanding and contracting circle. Breathe in as it grows, hold, and breathe out as it shrinks.</p>", unsafe_allow_html=True)
+    st.markdown('<div class="breathing-circle"></div>', unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def suggest_music():
-
-    st.subheader("🎧 Try relaxing music")
-
-    music_links = [
-        "https://youtu.be/5qap5aO4i9A",
-        "https://youtu.be/jfKfPfyJRdk"
-    ]
-
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("🎧 Relaxing Lo-Fi Music")
+    music_links = ["https://youtu.be/5qap5aO4i9A", "https://youtu.be/jfKfPfyJRdk"]
     st.video(random.choice(music_links))
-
-# ---------------- COMEDY SUGGESTION ----------------
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def suggest_comedy():
-
-    st.subheader("😂 A little laughter might help")
-
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("😂 A Little Laughter")
     comedy_links = [
         "https://www.youtube.com/watch?v=4Xo3Fq7GGWk",
         "https://www.youtube.com/watch?v=R8v7TwlYCt0",
         "https://www.youtube.com/watch?v=VvPaEsuz-tY"
     ]
-
     st.video(random.choice(comedy_links))
-    for link in comedy_links:
-        st.markdown(f"👉 Watch here: {link}")
-
-# ---------------- MOOD TRACKER ----------------
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def mood_tracker():
-
-    st.subheader("📊 Mood Tracker")
-
-    mood = st.selectbox(
-        "How are you feeling today?",
-        ["Happy","Calm","Stressed","Sad","Angry"]
-    )
-
-    if st.button("Save Mood"):
-        st.session_state.mood_history.append(mood)
-        st.success("Mood saved!")
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("📊 Mood Analytics")
+    
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        mood = st.selectbox("How are you feeling right now?", ["Happy", "Calm", "Stressed", "Sad", "Angry"])
+    with col2:
+        st.write("")
+        st.write("")
+        if st.button("Save Mood", use_container_width=True):
+            st.session_state.mood_history.append(mood)
+            st.success("Mood saved! 🌟")
 
     if len(st.session_state.mood_history) > 0:
-
         df = pd.DataFrame(st.session_state.mood_history, columns=["Mood"])
-
-        chart = df.value_counts().reset_index()
-        chart.columns = ["Mood","Count"]
-
-        st.bar_chart(chart.set_index("Mood"))
-
-# ---------------- CRISIS DETECTION ----------------
+        chart_data = df.value_counts().reset_index()
+        chart_data.columns = ["Mood", "Count"]
+        
+        color_map = {"Happy": "#FFD700", "Calm": "#4CAF50", "Stressed": "#FF9800", "Sad": "#2196F3", "Angry": "#F44336"}
+        
+        fig = px.pie(chart_data, values='Count', names='Mood', color='Mood', color_discrete_map=color_map, hole=0.5)
+        fig.update_layout(margin=dict(t=20, b=20, l=0, r=0), showlegend=False)
+        fig.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def crisis_detection(text):
-
-    keywords = [
-        "suicide",
-        "kill myself",
-        "want to die",
-        "end my life"
-    ]
-
+    keywords = ["suicide", "kill myself", "want to die", "end my life"]
     for k in keywords:
-
         if k in text.lower():
-
             st.error(
             """
-            🚨 You are not alone.
+            🚨 **You are not alone.**
 
             Please reach out to someone immediately.
-
-            India Mental Health Helpline  
-            📞 9152987821
+            
+            **India Mental Health Helpline:** 📞 9152987821
             """
             )
 
-# ---------------- CHAT HISTORY ----------------
+# ---------------- MAIN LAYOUT ----------------
 
-for msg in st.session_state.messages:
+tab1, tab2, tab3 = st.tabs(["💬 Chat Assistant", "🛠️ Wellness Tools", "📝 Daily Journal"])
 
-    if msg["role"] != "system":
+with tab1:
+    for msg in st.session_state.messages:
+        if msg["role"] != "system":
+            avatar = "👤" if msg["role"] == "user" else "🤖"
+            with st.chat_message(msg["role"], avatar=avatar):
+                st.markdown(msg["content"])
 
-        with st.chat_message(msg["role"]):
+    if prompt := st.chat_input("How are you feeling today?"):
+        crisis_detection(prompt)
 
-            st.markdown(msg["content"])
+        with st.chat_message("user", avatar="👤"):
+            st.markdown(prompt)
 
-# ---------------- CHAT INPUT ----------------
+        st.session_state.messages.append({"role":"user","content":prompt})
 
-if prompt := st.chat_input("How are you feeling today?"):
+        with st.chat_message("assistant", avatar="🤖"):
+            placeholder = st.empty()
+            try:
+                if not client:
+                    st.error("Please enter your HuggingFace API Token in the sidebar to continue.")
+                    st.stop()
 
-    crisis_detection(prompt)
+                response = client.chat.completions.create(
+                    model=HF_MODEL,
+                    messages=st.session_state.messages,
+                    max_tokens=250,
+                    temperature=0.7
+                )
+                reply = response.choices[0].message.content
+                placeholder.markdown(reply)
+                st.session_state.messages.append({"role":"assistant","content":reply})
 
-    with st.chat_message("user"):
-        st.markdown(prompt)
+            except Exception as e:
+                st.error(f"API Error: {e}")
 
-    st.session_state.messages.append(
-        {"role":"user","content":prompt}
-    )
+        # Smart Triggers
+        if any(word in prompt.lower() for word in ["stress", "anxious", "panic", "overwhelmed"]):
+            st.info("💡 I noticed you might be stressed. Check out the **Wellness Tools** tab for a calming breathing exercise!")
+        if any(word in prompt.lower() for word in ["sad", "depressed", "down"]):
+            st.info("💡 I noticed you might be feeling down. Check out the **Wellness Tools** tab for some relaxing music or comedy.")
 
-    with st.chat_message("assistant"):
-
-        placeholder = st.empty()
-
-        try:
-            if not client:
-                st.error("Please enter your HuggingFace API Token in the sidebar to continue.")
-                st.stop()
-
-            response = client.chat.completions.create(
-                model=HF_MODEL,
-                messages=st.session_state.messages,
-                max_tokens=250,
-                temperature=0.7
-            )
-
-            reply = response.choices[0].message.content
-
-            placeholder.markdown(reply)
-
-            st.session_state.messages.append(
-                {"role":"assistant","content":reply}
-            )
-
-        except Exception as e:
-
-            st.error(f"API Error: {e}")
-
-    # -------- TRIGGER FEATURES --------
-
-    if "stress" in prompt or "anxious" in prompt:
-
+with tab2:
+    col1, col2 = st.columns(2)
+    with col1:
         breathing_exercise()
-
-    if "sad" in prompt or "depressed" in prompt:
-
+    with col2:
+        mood_tracker()
+    
+    col3, col4 = st.columns(2)
+    with col3:
         suggest_music()
+    with col4:
         suggest_comedy()
 
-# ---------------- SIDEBAR ----------------
-
-with st.sidebar:
-
-    st.header("Wellness Tools")
-
-    if st.button("🧘 Breathing Exercise"):
-        breathing_exercise()
-
-    if st.button("🎧 Relaxing Music"):
-        suggest_music()
-
-    if st.button("😂 Watch Comedy"):
-        suggest_comedy()
-
-    mood_tracker()
+with tab3:
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("📝 Private Reflection Journal")
+    st.write("Writing down your thoughts can help reduce stress and clarify your feelings.")
+    
+    journal_entry = st.text_area("What's on your mind today?", height=150)
+    if st.button("Save Entry", type="primary"):
+        if journal_entry:
+            st.session_state.journal_entries.append({"date": pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"), "text": journal_entry})
+            st.success("Journal entry saved securely for this session.")
+        else:
+            st.warning("Please write something before saving.")
+            
+    if st.session_state.journal_entries:
+        st.divider()
+        st.subheader("Past Entries")
+        for entry in reversed(st.session_state.journal_entries):
+            st.markdown(f"**{entry['date']}**")
+            st.info(entry['text'])
+    st.markdown('</div>', unsafe_allow_html=True)
