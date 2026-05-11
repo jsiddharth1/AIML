@@ -8,16 +8,9 @@ import plotly.express as px
 # ---------------- PAGE SETUP & UI DESIGN ----------------
 st.set_page_config(page_title="Mental Health Companion", page_icon="🌱", layout="centered")
 
-# Inject Custom Premium CSS
+# Inject Custom CSS responsive to Native Theme
 css = """
 <style>
-    .stApp {
-        background-color: #F7FAF7;
-    }
-    div[data-testid="stSidebar"] > div:first-child {
-        background-color: #E8F0E8;
-        border-right: 1px solid #d1e0d1;
-    }
     .breathing-circle {
         width: 150px;
         height: 150px;
@@ -25,7 +18,7 @@ css = """
         background: linear-gradient(135deg, #4CAF50, #81C784);
         margin: 40px auto;
         animation: breathe 10s infinite ease-in-out;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     }
     @keyframes breathe {
         0% { transform: scale(0.8); opacity: 0.8; }
@@ -34,15 +27,11 @@ css = """
         100% { transform: scale(0.8); opacity: 0.8; }
     }
     .feature-card {
-        background: white;
+        background-color: var(--secondary-background-color);
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
-        border: 1px solid #d1e0d1;
-    }
-    h1, h2, h3 {
-        color: #2C3E2D !important;
     }
 </style>
 """
