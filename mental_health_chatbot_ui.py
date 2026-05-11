@@ -14,25 +14,11 @@ st.warning("⚠️ I am an AI companion, not a licensed therapist.")
 
 # ---------------- API SETUP ----------------
 
-import os
-import toml
-
-# Try to get token from Streamlit secrets first, fallback to manual read, then sidebar input
+# Try to get token from Streamlit secrets first, fallback to sidebar input
 try:
     hf_token = st.secrets.get("HF_TOKEN")
 except Exception:
     hf_token = None
-
-if not hf_token:
-    try:
-        secrets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml"))
-        if os.path.exists(secrets_path):
-            with open(secrets_path, "r") as f:
-                hf_token = toml.load(f).get("HF_TOKEN")
-        else:
-            st.sidebar.warning(f"Could not find file at: {secrets_path}")
-    except Exception as e:
-        st.sidebar.error(f"Error loading manual secrets: {e}")
 
 with st.sidebar:
     st.header("⚙️ Configuration")
@@ -198,7 +184,7 @@ if prompt := st.chat_input("How are you feeling today?"):
 
         try:
             if not client:
-                st.error(f"DEBUG ERROR: The app couldn't load the token.\nhf_token value is: {repr(hf_token)}\n__file__ is: {__file__}")
+                st.error("Please enter your HuggingFace API Token in the sidebar to continue.")
                 st.stop()
 
             response = client.chat.completions.create(
