@@ -14,11 +14,23 @@ st.warning("⚠️ I am an AI companion, not a licensed therapist.")
 
 # ---------------- API SETUP ----------------
 
-# Try to get token from Streamlit secrets first, fallback to sidebar input
+import os
+import toml
+
+# Try to get token from Streamlit secrets first, fallback to manual read, then sidebar input
 try:
-    hf_token = st.secrets["HF_TOKEN"]
-except (FileNotFoundError, KeyError):
+    hf_token = st.secrets.get("HF_TOKEN")
+except Exception:
     hf_token = None
+
+if not hf_token:
+    try:
+        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+        if os.path.exists(secrets_path):
+            with open(secrets_path, "r") as f:
+                hf_token = toml.load(f).get("HF_TOKEN")
+    except Exception:
+        pass
 
 with st.sidebar:
     st.header("⚙️ Configuration")
