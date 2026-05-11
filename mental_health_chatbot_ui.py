@@ -25,12 +25,14 @@ except Exception:
 
 if not hf_token:
     try:
-        secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml")
+        secrets_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".streamlit", "secrets.toml"))
         if os.path.exists(secrets_path):
             with open(secrets_path, "r") as f:
                 hf_token = toml.load(f).get("HF_TOKEN")
-    except Exception:
-        pass
+        else:
+            st.sidebar.warning(f"Could not find file at: {secrets_path}")
+    except Exception as e:
+        st.sidebar.error(f"Error loading manual secrets: {e}")
 
 with st.sidebar:
     st.header("⚙️ Configuration")
