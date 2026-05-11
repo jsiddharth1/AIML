@@ -13,10 +13,12 @@ st.caption("A supportive AI chatbot for student mental well-being")
 st.warning("⚠️ I am an AI companion, not a licensed therapist.")
 
 # ---------------- API SETUP ----------------
+with st.sidebar:
+    st.header("⚙️ Configuration")
+    hf_token = st.text_input("HuggingFace API Token", value="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", type="password", help="Get your token from https://huggingface.co/settings/tokens")
 
-hf_token = "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"
-
-client = OpenAI(
+if hf_token:
+    client = OpenAI(
     base_url="https://router.huggingface.co/v1",
     api_key=hf_token
 )
