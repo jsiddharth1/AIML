@@ -8,62 +8,42 @@ import plotly.express as px
 # ---------------- PAGE SETUP & UI DESIGN ----------------
 st.set_page_config(page_title="Mental Health Companion", page_icon="🌱", layout="centered")
 
-# Theme Toggle
-with st.sidebar:
-    st.header("⚙️ Configuration")
-    dark_mode = st.toggle("🌙 Dark Mode", value=False)
-
-# Inject Custom Premium CSS (Dynamic based on theme)
-if dark_mode:
-    bg_color = "#121212"
-    secondary_bg = "#1E1E1E"
-    text_color = "#E0E0E0"
-    border_color = "#333333"
-    card_shadow = "rgba(0,0,0,0.5)"
-    circle_gradient = "linear-gradient(135deg, #1E88E5, #4CAF50)"
-else:
-    bg_color = "#F7FAF7"
-    secondary_bg = "#E8F0E8"
-    text_color = "#2C3E2D"
-    border_color = "#d1e0d1"
-    card_shadow = "rgba(0,0,0,0.03)"
-    circle_gradient = "linear-gradient(135deg, #4CAF50, #81C784)"
-
-css = f"""
+# Inject Custom Premium CSS
+css = """
 <style>
-    .stApp {{
-        background-color: {bg_color} !important;
-    }}
-    .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp label {{
-        color: {text_color} !important;
-    }}
-    div[data-testid="stSidebar"] {{
-        background-color: {secondary_bg} !important;
-        border-right: 1px solid {border_color} !important;
-    }}
-    .breathing-circle {{
+    .stApp {
+        background-color: #F7FAF7;
+    }
+    div[data-testid="stSidebar"] > div:first-child {
+        background-color: #E8F0E8;
+        border-right: 1px solid #d1e0d1;
+    }
+    .breathing-circle {
         width: 150px;
         height: 150px;
         border-radius: 50%;
-        background: {circle_gradient} !important;
+        background: linear-gradient(135deg, #4CAF50, #81C784);
         margin: 40px auto;
         animation: breathe 10s infinite ease-in-out;
-        box-shadow: 0 10px 20px {card_shadow} !important;
-    }}
-    @keyframes breathe {{
-        0% {{ transform: scale(0.8); opacity: 0.8; }}
-        40% {{ transform: scale(1.3); opacity: 1; }}
-        50% {{ transform: scale(1.3); opacity: 1; }}
-        100% {{ transform: scale(0.8); opacity: 0.8; }}
-    }}
-    .feature-card {{
-        background: {secondary_bg} !important;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    }
+    @keyframes breathe {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        40% { transform: scale(1.3); opacity: 1; }
+        50% { transform: scale(1.3); opacity: 1; }
+        100% { transform: scale(0.8); opacity: 0.8; }
+    }
+    .feature-card {
+        background: white;
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0 4px 10px {card_shadow} !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         margin-bottom: 20px;
-        border: 1px solid {border_color} !important;
-    }}
+        border: 1px solid #d1e0d1;
+    }
+    h1, h2, h3 {
+        color: #2C3E2D !important;
+    }
 </style>
 """
 st.markdown(css, unsafe_allow_html=True)
@@ -80,6 +60,7 @@ except Exception:
     hf_token = None
 
 with st.sidebar:
+    st.header("⚙️ Configuration")
     if not hf_token:
         hf_token = st.text_input("HuggingFace API Token", type="password", help="Get your token from https://huggingface.co/settings/tokens")
     else:
