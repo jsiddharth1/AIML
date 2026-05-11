@@ -133,8 +133,7 @@ def mood_tracker():
         fig = px.pie(chart_data, values='Count', names='Mood', color='Mood', color_discrete_map=color_map, hole=0.5)
         # Fix plotly background for dark mode
         fig.update_layout(margin=dict(t=20, b=20, l=0, r=0), showlegend=False, 
-                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-                          font=dict(color=text_color))
+                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
         fig.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
