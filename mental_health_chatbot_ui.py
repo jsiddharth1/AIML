@@ -15,7 +15,7 @@ st.warning("⚠️ I am an AI companion, not a licensed therapist.")
 # ---------------- API SETUP ----------------
 with st.sidebar:
     st.header("⚙️ Configuration")
-    hf_token = st.text_input("HuggingFace API Token", value="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", type="password", help="Get your token from https://huggingface.co/settings/tokens")
+    hf_token = st.text_input("HuggingFace API Token", value="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", type="password", help="Get your token from https://huggingface.co/settings/tokens")
 
 if hf_token:
     client = OpenAI(
