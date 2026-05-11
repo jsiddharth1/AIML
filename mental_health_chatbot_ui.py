@@ -13,15 +13,27 @@ st.caption("A supportive AI chatbot for student mental well-being")
 st.warning("⚠️ I am an AI companion, not a licensed therapist.")
 
 # ---------------- API SETUP ----------------
+
+# Try to get token from Streamlit secrets first, fallback to sidebar input
+try:
+    hf_token = st.secrets["HF_TOKEN"]
+except (FileNotFoundError, KeyError):
+    hf_token = None
+
 with st.sidebar:
     st.header("⚙️ Configuration")
-    hf_token = st.text_input("HuggingFace API Token", value="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", type="password", help="Get your token from https://huggingface.co/settings/tokens")
+    if not hf_token:
+        hf_token = st.text_input("HuggingFace API Token", type="password", help="Get your token from https://huggingface.co/settings/tokens")
+    else:
+        st.success("API Key loaded securely from secrets!")
 
 if hf_token:
     client = OpenAI(
-    base_url="https://router.huggingface.co/v1",
-    api_key=hf_token
-)
+        base_url="https://router.huggingface.co/v1",
+        api_key=hf_token
+    )
+else:
+    client = None
 
 HF_MODEL = "meta-llama/Llama-3.1-8B-Instruct"
 
@@ -171,6 +183,9 @@ if prompt := st.chat_input("How are you feeling today?"):
         placeholder = st.empty()
 
         try:
+            if not client:
+                st.error("Please enter your HuggingFace API Token in the sidebar to continue.")
+                st.stop()
 
             response = client.chat.completions.create(
                 model=HF_MODEL,
