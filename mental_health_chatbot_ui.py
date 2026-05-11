@@ -8,44 +8,65 @@ import plotly.express as px
 # ---------------- PAGE SETUP & UI DESIGN ----------------
 st.set_page_config(page_title="Mental Health Companion", page_icon="🌱", layout="centered")
 
-# Inject Custom Premium CSS
-st.markdown("""
+# Theme Toggle
+with st.sidebar:
+    st.header("⚙️ Configuration")
+    dark_mode = st.toggle("🌙 Dark Mode", value=False)
+
+# Inject Custom Premium CSS (Dynamic based on theme)
+if dark_mode:
+    bg_color = "#121212"
+    secondary_bg = "#1E1E1E"
+    text_color = "#E0E0E0"
+    border_color = "#333333"
+    card_shadow = "rgba(0,0,0,0.5)"
+    circle_gradient = "linear-gradient(135deg, #1E88E5, #4CAF50)"
+else:
+    bg_color = "#F7FAF7"
+    secondary_bg = "#E8F0E8"
+    text_color = "#2C3E2D"
+    border_color = "#d1e0d1"
+    card_shadow = "rgba(0,0,0,0.03)"
+    circle_gradient = "linear-gradient(135deg, #4CAF50, #81C784)"
+
+css = f"""
 <style>
-    .stApp {
-        background-color: #F7FAF7;
-    }
-    div[data-testid="stSidebar"] {
-        background-color: #E8F0E8;
-        border-right: 1px solid #d1e0d1;
-    }
-    .breathing-circle {
+    .stApp {{
+        background-color: {bg_color} !important;
+    }}
+    .stApp, .stApp p, .stApp h1, .stApp h2, .stApp h3, .stApp label {{
+        color: {text_color} !important;
+    }}
+    div[data-testid="stSidebar"] {{
+        background-color: {secondary_bg} !important;
+        border-right: 1px solid {border_color} !important;
+    }}
+    .breathing-circle {{
         width: 150px;
         height: 150px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #4CAF50, #81C784);
+        background: {circle_gradient} !important;
         margin: 40px auto;
         animation: breathe 10s infinite ease-in-out;
-        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.2);
-    }
-    @keyframes breathe {
-        0% { transform: scale(0.8); opacity: 0.8; }
-        40% { transform: scale(1.3); opacity: 1; }
-        50% { transform: scale(1.3); opacity: 1; }
-        100% { transform: scale(0.8); opacity: 0.8; }
-    }
-    .feature-card {
-        background: white;
+        box-shadow: 0 10px 20px {card_shadow} !important;
+    }}
+    @keyframes breathe {{
+        0% {{ transform: scale(0.8); opacity: 0.8; }}
+        40% {{ transform: scale(1.3); opacity: 1; }}
+        50% {{ transform: scale(1.3); opacity: 1; }}
+        100% {{ transform: scale(0.8); opacity: 0.8; }}
+    }}
+    .feature-card {{
+        background: {secondary_bg} !important;
         padding: 20px;
         border-radius: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        box-shadow: 0 4px 10px {card_shadow} !important;
         margin-bottom: 20px;
-        border: 1px solid #edf2ed;
-    }
-    h1, h2, h3 {
-        color: #2C3E2D;
-    }
+        border: 1px solid {border_color} !important;
+    }}
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(css, unsafe_allow_html=True)
 
 st.title("🌱 Student Mental Health Companion")
 st.caption("A premium, supportive AI chatbot for student mental well-being")
@@ -59,7 +80,6 @@ except Exception:
     hf_token = None
 
 with st.sidebar:
-    st.header("⚙️ Configuration")
     if not hf_token:
         hf_token = st.text_input("HuggingFace API Token", type="password", help="Get your token from https://huggingface.co/settings/tokens")
     else:
@@ -82,7 +102,7 @@ if "messages" not in st.session_state:
             "role":"system",
             "content":
             "You are a warm, empathetic mental health companion for university students. "
-            "Always be highly supportive, validate their feelings, and occasionally suggest using the app's built-in wellness tools (like the visual breathing exercise, music therapy, or the journal)."
+            "Always be highly supportive, validate their feelings, and occasionally suggest using the app's built-in wellness tools (like the visual breathing exercise, music therapy, or the CBT Reframing tool)."
         }
     ]
 
@@ -97,7 +117,7 @@ if "journal_entries" not in st.session_state:
 def breathing_exercise():
     st.markdown('<div class="feature-card">', unsafe_allow_html=True)
     st.subheader("🧘 Visual Breathing Exercise")
-    st.markdown("<p style='text-align:center; color:#555;'>Follow the expanding and contracting circle. Breathe in as it grows, hold, and breathe out as it shrinks.</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center;'>Follow the expanding and contracting circle. Breathe in as it grows, hold, and breathe out as it shrinks.</p>", unsafe_allow_html=True)
     st.markdown('<div class="breathing-circle"></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -141,9 +161,38 @@ def mood_tracker():
         color_map = {"Happy": "#FFD700", "Calm": "#4CAF50", "Stressed": "#FF9800", "Sad": "#2196F3", "Angry": "#F44336"}
         
         fig = px.pie(chart_data, values='Count', names='Mood', color='Mood', color_discrete_map=color_map, hole=0.5)
-        fig.update_layout(margin=dict(t=20, b=20, l=0, r=0), showlegend=False)
+        # Fix plotly background for dark mode
+        fig.update_layout(margin=dict(t=20, b=20, l=0, r=0), showlegend=False, 
+                          paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                          font=dict(color=text_color))
         fig.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+def cbt_reframing():
+    st.markdown('<div class="feature-card">', unsafe_allow_html=True)
+    st.subheader("🧠 CBT Thought Reframing")
+    st.write("Write down a negative thought you're having, and the AI will help you reframe it into a more balanced perspective.")
+    
+    negative_thought = st.text_area("Your negative thought:", height=100)
+    if st.button("Reframe Thought", type="primary"):
+        if negative_thought and client:
+            with st.spinner("Analyzing your thought..."):
+                prompt = f"Act as a CBT therapist. The user has this negative thought: '{negative_thought}'. Identify any cognitive distortions and provide a healthier, balanced reframed thought. Keep it under 3 sentences."
+                try:
+                    response = client.chat.completions.create(
+                        model=HF_MODEL,
+                        messages=[{"role":"system", "content":prompt}],
+                        max_tokens=200,
+                        temperature=0.7
+                    )
+                    reply = response.choices[0].message.content
+                    st.success("Reframed Perspective:")
+                    st.write(reply)
+                except Exception as e:
+                    st.error("Error connecting to AI.")
+        elif not client:
+            st.warning("Please configure your API key in the sidebar.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 def crisis_detection(text):
@@ -201,22 +250,29 @@ with tab1:
 
         # Smart Triggers
         if any(word in prompt.lower() for word in ["stress", "anxious", "panic", "overwhelmed"]):
-            st.info("💡 I noticed you might be stressed. Check out the **Wellness Tools** tab for a calming breathing exercise!")
+            st.info("💡 I noticed you might be stressed. Check out the **Wellness Tools** tab for a calming CBT Reframing exercise!")
         if any(word in prompt.lower() for word in ["sad", "depressed", "down"]):
             st.info("💡 I noticed you might be feeling down. Check out the **Wellness Tools** tab for some relaxing music or comedy.")
 
 with tab2:
-    col1, col2 = st.columns(2)
-    with col1:
-        breathing_exercise()
-    with col2:
-        mood_tracker()
+    # Selective Tool Rendering
+    st.write("### Choose a Tool")
+    selected_tool = st.radio("Select Tool", 
+                             ["🧘 Breathing Exercise", "🧠 CBT Reframing", "🎧 Relaxing Music", "😂 Comedy", "📊 Mood Tracker"], 
+                             horizontal=True, label_visibility="collapsed")
     
-    col3, col4 = st.columns(2)
-    with col3:
+    st.divider()
+    
+    if selected_tool == "🧘 Breathing Exercise":
+        breathing_exercise()
+    elif selected_tool == "🧠 CBT Reframing":
+        cbt_reframing()
+    elif selected_tool == "🎧 Relaxing Music":
         suggest_music()
-    with col4:
+    elif selected_tool == "😂 Comedy":
         suggest_comedy()
+    elif selected_tool == "📊 Mood Tracker":
+        mood_tracker()
 
 with tab3:
     st.markdown('<div class="feature-card">', unsafe_allow_html=True)
