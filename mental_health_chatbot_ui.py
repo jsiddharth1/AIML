@@ -40,6 +40,11 @@ css = """
     html, body, [class*="css"], .stApp * {
         font-family: 'Quicksand', sans-serif !important;
     }
+    
+    /* Prevent icon text from showing */
+    .material-symbols-rounded, .material-icons, .stIcon, [data-testid="stIconMaterial"] {
+        font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    }
 
     /* Round chat box corners */
     div[data-testid="stChatInput"] {
