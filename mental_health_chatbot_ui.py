@@ -11,6 +11,8 @@ st.set_page_config(page_title="Mental Health Companion", page_icon="🌱", layou
 # Inject Custom CSS responsive to Native Theme
 css = """
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap');
+    
     .breathing-circle {
         width: 150px;
         height: 150px;
@@ -32,6 +34,26 @@ css = """
         border-radius: 15px;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         margin-bottom: 20px;
+    }
+
+    /* Change font */
+    html, body, [class*="css"], .stApp * {
+        font-family: 'Quicksand', sans-serif !important;
+    }
+
+    /* Round chat box corners */
+    div[data-testid="stChatInput"] {
+        border-radius: 30px !important;
+        overflow: hidden !important;
+    }
+    div[data-testid="stChatInputContainer"] {
+        border-radius: 30px !important;
+    }
+
+    /* Round Text Areas (e.g., Daily Journal) */
+    div[data-testid="stTextArea"] textarea {
+        border-radius: 20px !important;
+        padding: 15px !important;
     }
 </style>
 """
